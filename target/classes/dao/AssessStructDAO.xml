@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.AssessStructDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.AssessStruct">
+        <!--@Table assess_struct-->
+        <result property="assessStructId" column="assess_struct_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="assessStructWeight" column="assess_struct_weight" jdbcType="NUMERIC"/>
+        <result property="assessStructDesc" column="assess_struct_desc" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select assess_struct_id,
+               course_id,
+               assess_struct_weight,
+               assess_struct_desc,
+               create_time,
+               modify_time
+        from assess_struct
+        where assess_struct_id = #{assessStructId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select assess_struct_id,
+               course_id,
+               assess_struct_weight,
+               assess_struct_desc,
+               create_time,
+               modify_time
+        from assess_struct
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        assess_struct_id, course_id, assess_struct_weight, assess_struct_desc, create_time, modify_time
+        from assess_struct
+        <where>
+            <if test="assessStructId != null">
+                and assess_struct_id = #{assessStructId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="assessStructWeight != null">
+                and assess_struct_weight = #{assessStructWeight}
+            </if>
+            <if test="assessStructDesc != null and assessStructDesc != ''">
+                and assess_struct_desc = #{assessStructDesc}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryAllKeysByCourseId" resultType="java.lang.Long">
+        select assess_struct_id
+        from assess_struct
+        where course_id = #{course_id}
+    </select>
+
+    <select id="mGetAssessStructByCourseId" resultMap="BaseResultMap">
+        select assess_struct_id,
+               course_id,
+               assess_struct_weight,
+               assess_struct_desc,
+               create_time,
+               modify_time
+        from assess_struct
+        where course_id = #{courseId}
+    </select>
+
+    <select id="mGetAssessStructIdByCourseId" resultType="java.lang.Long">
+        select assess_struct_id
+        from assess_struct
+        where course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="assessStructId" useGeneratedKeys="true">
+        insert into assess_struct(course_id, assess_struct_weight, assess_struct_desc)
+        values (#{courseId}, #{assessStructWeight}, #{assessStructDesc})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="assessStructId">
+        insert into assess_struct(course_id, assess_struct_weight, assess_struct_desc)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.assessStructWeight}, #{item.assessStructDesc})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update assess_struct
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="assessStructWeight != null">
+                assess_struct_weight = #{assessStructWeight},
+            </if>
+            <if test="assessStructDesc != null and assessStructDesc != ''">
+                assess_struct_desc = #{assessStructDesc},
+            </if>
+        </set>
+        where assess_struct_id = #{assessStructId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateAssessStructDTOs != null">
+            <foreach collection="updateAssessStructDTOs" item="item" index="index" separator=";">
+                update assess_struct
+                <set>
+                    <if test="item.assessStructWeight != null">
+                        assess_struct_weight = #{item.assessStructWeight},
+                    </if>
+                    <if test="item.assessStructDesc != null and item.assessStructDesc != ''">
+                        assess_struct_desc = #{item.assessStructDesc},
+                    </if>
+                </set>
+                where assess_struct_id = #{item.assessStructId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from assess_struct
+        where assess_struct_id = #{assessStructId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from assess_struct
+        where assess_struct_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByCourseId">
+        delete
+        from assess_struct
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

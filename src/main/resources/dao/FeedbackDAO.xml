@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.FeedbackDAO">
+
+    <resultMap id="feedback4TeacherMap" type="com.bylan.dcybackend.vo.Feedback4TeacherVO">
+        <result column="feedback_id" property="feedbackId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="feedback_content" property="feedbackContent"/>
+        <result column="attachment_path" property="filePath"/>
+    </resultMap>
+
+    <resultMap id="feedback4StudentMap" type="com.bylan.dcybackend.vo.Feedback4StudentVO">
+        <result column="feedback_id" property="feedbackId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="feedback_content" property="feedbackContent"/>
+        <result column="attachment_path" property="filePath"/>
+        <result column="feedback_status" property="feedbackStatus"/>
+        <result column="feedback_response" property="feedbackResponse"/>
+    </resultMap>
+
+    <insert id="createFeedback" useGeneratedKeys="true" keyProperty="feedbackId"
+            parameterType="com.bylan.dcybackend.dto.CreateFeedbackDTO">
+        insert into feedback(teacher_id, student_id, feedback_content, attachment_path, feedback_status)
+        values (#{teacherId}, #{studentId}, #{feedbackContent}, #{filePath}, #{feedbackStatus})
+    </insert>
+
+    <update id="updateFeedbackResponse" parameterType="com.bylan.dcybackend.dto.UpdateFeedbackDTO">
+        update feedback
+        set feedback_response = #{feedbackResponse},
+            feedback_status   = #{feedbackStatus}
+        where feedback_id = #{feedbackId}
+    </update>
+    <select id="getFeedbackByTeacherId" resultMap="feedback4TeacherMap">
+        select feedback_id, student_id, feedback_content, attachment_path
+        from feedback
+        where teacher_id = #{teacherId}
+          and feedback_status = #{status}
+    </select>
+
+    <select id="getFeedbackByStudentId" resultMap="feedback4StudentMap">
+        select feedback_id, teacher_id, feedback_content, attachment_path, feedback_status, feedback_response
+        from feedback
+        where student_id = #{studentId}
+    </select>
+
+</mapper>

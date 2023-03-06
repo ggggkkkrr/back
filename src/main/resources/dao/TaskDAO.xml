@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bylan.dcybackend.dao.TaskDAO">
+
+    <resultMap id="taskCategoryMap" type="com.bylan.dcybackend.vo.TaskCategoryVO">
+        <id column="task_type" property="taskType"/>
+        <collection property="taskList" ofType="com.bylan.dcybackend.vo.TaskCategoryItemVO">
+            <id column="task_id" property="taskId"/>
+            <result column="task_name" property="taskName"/>
+            <result column="task_desc" property="taskDesc"/>
+            <result column="task_status" property="taskStatus"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="taskScoreDetailVOMap" type="com.bylan.dcybackend.vo.TaskScoreDetailVO">
+        <result column="task_id" property="taskId"/>
+        <result column="task_type" property="taskType"/>
+        <result column="task_name" property="taskName"/>
+        <result column="task_desc" property="taskDesc"/>
+        <result column="week" property="week"/>
+        <result column="task_file_path" property="path"/>
+        <result column="task_status" property="taskStatus"/>
+    </resultMap>
+
+    <insert id="mInsertTask" parameterType="java.util.List">
+        insert into task
+        (
+        section_id,
+        task_type,
+        task_name,
+        task_desc,
+        release_time,
+        deadline,
+        week,
+        task_status,
+        task_file_path
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.sectionId},
+            #{item.taskType},
+            #{item.taskName},
+            #{item.taskDesc},
+            #{item.releaseTime},
+            #{item.deadline},
+            #{item.week},
+            #{item.taskStatus},
+            #{item.taskFilePath}
+            )
+        </foreach>
+    </insert>
+
+    <select id="mGetTask" resultType="Task">
+        select task_id,
+               section_id,
+               task_type,
+               task_name,
+               task_desc,
+               release_time,
+               deadline,
+               week,
+               task_status,
+               task_file_path,
+               create_time,
+               modify_time
+        from task
+        where section_id = #{sectionId}
+    </select>
+
+    <select id="getDeadlineByQuestId" resultType="java.util.Date">
+        select deadline
+        from task,
+             question
+        where task.task_id = question.task_id
+          and question.question_id = #{questionId}
+    </select>
+
+    <select id="getDeadlineByTaskId" resultType="java.util.Date">
+        select deadline
+        from task
+        where task.task_id = #{taskId}
+    </select>
+
+    <select id="getTaskCategoryBySectionIdAndWeek" resultMap="taskCategoryMap">
+        select task_id,task_desc,task_name,task_type, task_status
+        from task
+        where section_id = #{sectionId}
+        <if test="week!=null">
+            and #{week} = week
+        </if>
+    </select>
+
+    <select id="getSectionIdByTaskId" resultType="java.lang.Long">
+        select section_id
+        from task
+        where task_id = #{taskId}
+    </select>
+
+    <select id="getStatusByTaskId" resultType="java.lang.Long">
+        select task_status
+        from task
+        where task_id = #{taskId}
+    </select>
+
+    <select id="getStatusByQuestionId" resultType="java.lang.Long">
+        select task.task_status
+        from task,
+             question
+        where task.task_id = question.task_id
+          and question.question_id = #{questionId}
+    </select>
+
+    <select id="getBySectionIdAndStatus" resultMap="taskScoreDetailVOMap">
+        select task_id, task_type, task_name, task_desc, week, task_file_path, task_status
+        from task
+        where section_id = #{sectionId}
+          and task_status = #{status}
+    </select>
+
+    <select id="getLatestWeekByCourseId" resultType="java.lang.Long">
+        select max(week)
+        from task
+        where task.section_id in (select section.section_id
+                                  from section
+                                  where section.course_id = #{courseId})
+    </select>
+
+    <select id="getWeekByQuestionId" resultType="java.lang.Long">
+        select task.week
+        from task
+        where task.task_id = (select question.task_id
+                              from question
+                              where question.question_id = #{questionId})
+    </select>
+
+    <select id="getSectionIdByQuestionId" resultType="java.lang.Long">
+        select task.section_id
+        from task
+        where task.task_id = (select question.task_id
+                              from question
+                              where question_id = #{questionId})
+    </select>
+    <select id="getBySectionIdAndAssertType" resultType="com.bylan.dcybackend.vo.StuReachDetailHeaderVO">
+        select task.task_id, task.task_name, task.task_desc
+        from task
+        where section_id = #{sectionId}
+          and week = #{week}
+          and task_type = #{assertType}
+          and task_status = #{status}
+    </select>
+
+    <select id="getCourseProgressByWeek" resultType="com.bylan.dcybackend.bo.CourseProgressBO">
+        select distinct ilo.ilo_id, ilo.ilo_desc, knowledge_id, knowledge_desc
+        from knowledge_point
+                 left outer join ilo on knowledge_point.ilo_id = ilo.ilo_id
+        where knowledge_point.knowledge_id in (select question_knowledge_point.knowledge_id
+                                               from question_knowledge_point
+                                                        left outer join question on question_knowledge_point.question_id = question.question_id
+                                               where question.task_id in (select task.task_id
+                                                                          from task
+                                                                          where task.week = #{week}
+                                                                            and task.section_id in
+                                                                                (select section.section_id
+                                                                                 from section
+                                                                                 where section.course_id = #{courseId})))
+    </select>
+
+    <select id="getAssessTypeByKnowledgeIdAndWeek" resultType="java.lang.Long">
+        select task.task_type
+        from task
+        where task.week = #{week}
+          and task.task_id in (select question.task_id
+                               from question
+                               where question.question_id in (select question_knowledge_point.question_id
+                                                              from question_knowledge_point
+                                                              where question_knowledge_point.knowledge_id = #{knowledgeId}))
+    </select>
+    <select id="getLatestWeekBySectionIdAndStatus" resultType="java.lang.Long">
+        select max(week)
+        from task
+        where task.section_id=#{sectionId} and task.task_status = #{status}
+        <if test="assessType != null">
+            and task.task_type = #{assessType}
+        </if>
+    </select>
+
+    <update id="mUpdateTask" parameterType="java.util.List">
+        <if test="taskList!=null">
+            <foreach collection="list" item="item" index="index" separator=";">
+                update task
+                <trim prefix="set" suffixOverrides=",">
+                    <if test="item.taskType!=null">task_type = #{item.taskType},</if>
+                    <if test="item.taskName!=null">task_name = #{item.taskName},</if>
+                    <if test="item.taskDesc!=null">task_desc = #{item.taskDesc},</if>
+                    <if test="item.releaseTime!=null">release_time = #{item.releaseTime},</if>
+                    <if test="item.deadline!=null">deadline = #{item.deadline},</if>
+                    <if test="item.taskStatus!=null">task_status = #{item.taskStatus},</if>
+                    <if test="item.taskFilePath!=null">task_file_path = #{item.taskFilePath},</if>
+                </trim>
+                where task_id = #{item.taskId}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateTaskStatus">
+        update task
+        set task_status = #{status}
+        where task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateTaskReleaseTime">
+        update task
+        set release_time = NOW()
+        where task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <delete id="mDeleteTask" parameterType="java.util.List">
+        delete from task where task_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getTaskByTaskId" resultType="Task">
+        select task_id,
+               section_id,
+               task_type,
+               task_name,
+               task_desc,
+               release_time,
+               deadline,
+               week,
+               task_status,
+               task_file_path
+        from task
+        where task_id = #{taskId}
+    </select>
+</mapper>

@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "netty",
+      "type": "com.bylan.dcybackend.config.NettyProperties",
+      "sourceType": "com.bylan.dcybackend.config.NettyProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "netty.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bylan.dcybackend.config.NettyProperties"
+    },
+    {
+      "name": "netty.websocket-path",
+      "type": "java.lang.String",
+      "sourceType": "com.bylan.dcybackend.config.NettyProperties"
+    }
+  ],
+  "hints": []
+}

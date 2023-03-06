@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bylan.dcybackend.dao.QuestionScoreDAO">
+
+    <resultMap id="taskScoreMap" type="com.bylan.dcybackend.bo.StuReachDetailBO">
+        <result column="student_id" property="studentId"></result>
+        <result column="task_id" property="taskId"></result>
+        <result column="task_score" property="taskScore"></result>
+    </resultMap>
+
+    <insert id="mCreateQuestScore" parameterType="java.util.List">
+        insert into question_score(
+        student_id,
+        question_id,
+        question_score,
+        task_id
+        )
+        values
+        <foreach collection="createQuestScoreDTOs" item="item" index="index" separator=",">
+            (
+            #{item.studentId},
+            #{item.questionId},
+            #{item.questionScore},
+            #{item.taskId}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateQuestionScore">
+        <if test="list != null">
+            <foreach collection="list" item="item" index="index" separator=";">
+                update question_score
+                set question_score = #{item.questionScore}
+                where student_id = #{item.studentId} and question_id = #{item.questionId}
+            </foreach>
+        </if>
+    </update>
+
+    <select id="getScoreByQuestionId" resultType="java.lang.Double">
+        select question_score
+        from question_score
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getScoreCountByQuestionId" resultType="java.lang.Integer">
+        select count(question_score)
+        from question_score
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getScoreByStuIdAndTaskId" resultType="java.lang.Double">
+        select question_score
+        from question_score
+        where student_id = #{studentId}
+          and task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionScoreByStuIdAndTaskId" resultType="com.bylan.dcybackend.vo.QuestionScoreDetailVO">
+        select question.task_id, question.question_name, question.question_desc
+        from question
+                 join question_score on question.question_id = question_score.question_id
+        where question.task_id = #{taskId}
+          and question_score.student_id = #{studentId}
+    </select>
+
+    <select id="getQuestionScoreByStuIdAndQuestionId" resultType="java.lang.Double">
+        select question_score.question_score
+        from question_score
+        where question_score.question_id = #{questionId}
+          and question_score.student_id = #{studentId}
+    </select>
+
+    <select id="getByStuIdAndQuestionId" resultType="java.lang.Integer">
+        select count(1)
+        from question_score
+        where question_score.student_id = #{studentId}
+          and question_score.question_id = #{questionId}
+    </select>
+
+    <select id="getAverageScoreByQuestionId" resultType="java.lang.Double">
+        select avg(question_score)
+        from question_score
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getTaskScoreByStuIdAndTaskId" resultType="java.lang.Double">
+        select count(question_score)
+        from question_score
+        where task_id = #{taskId}
+          and student_id = #{studentId}
+    </select>
+    <select id="getRecordNumByTaskId" resultType="java.lang.Integer">
+        select count(1)
+        from question_score
+        where task_id = #{taskId}
+    </select>
+    <select id="getByTaskId" resultType="com.bylan.dcybackend.entity.QuestionScore">
+        select student_id, question_id, question_score
+        from question_score
+        where task_id = #{taskId}
+    </select>
+    <select id="getStuTaskScoreByTaskIds" resultMap="taskScoreMap">
+        select task_id,student_id,sum(question_score) as task_score
+        from question_score
+        where task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        group by task_id,student_id
+    </select>
+    <select id="getQuestionScoreByQuestIdAndSectionId" resultType="com.bylan.dcybackend.entity.QuestionScore">
+        select section_student.student_id as studentId, question_score
+        from question_score join section_student on question_score.student_id = section_student.student_id
+        where section_student.section_id = #{sectionId} and question_score.question_id = #{questionId}
+    </select>
+
+</mapper>

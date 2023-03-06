@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.IloAssessStructDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.IloAssessStruct">
+        <!--@Table ilo_assess_struct-->
+        <result property="iloId" column="ilo_id" jdbcType="INTEGER"/>
+        <result property="assessStructId" column="assess_struct_id" jdbcType="INTEGER"/>
+        <result property="underExpectation" column="under_expectation" jdbcType="VARCHAR"/>
+        <result property="meetExpectation" column="meet_expectation" jdbcType="VARCHAR"/>
+        <result property="beyondExpectation" column="beyond_expectation" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select ilo_id,
+               assess_struct_id,
+               under_expectation,
+               meet_expectation,
+               beyond_expectation,
+               create_time,
+               modify_time
+        from ilo_assess_struct
+        where ilo_id = #{iloId}
+          and assess_struct_id = #{assessStructId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select ilo_id,
+               assess_struct_id,
+               under_expectation,
+               meet_expectation,
+               beyond_expectation,
+               create_time,
+               modify_time
+        from ilo_assess_struct
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        ilo_id, assess_struct_id, under_expectation, meet_expectation, beyond_expectation, create_time, modify_time
+        from ilo_assess_struct
+        <where>
+            <if test="iloId != null">
+                and ilo_id = #{iloId}
+            </if>
+            <if test="assessStructId != null">
+                and assess_struct_id = #{assessStructId}
+            </if>
+            <if test="underExpectation != null and underExpectation != ''">
+                and under_expectation = #{underExpectation}
+            </if>
+            <if test="meetExpectation != null and meetExpectation != ''">
+                and meet_expectation = #{meetExpectation}
+            </if>
+            <if test="beyondExpectation != null and beyondExpectation != ''">
+                and beyond_expectation = #{beyondExpectation}
+            </if>
+        </where>
+    </select>
+
+    <select id="mGetIloAssessStructByAssessStructId" resultMap="BaseResultMap">
+        select ilo_id,
+               assess_struct_id,
+               under_expectation,
+               meet_expectation,
+               beyond_expectation,
+               create_time,
+               modify_time
+        from ilo_assess_struct
+        where assess_struct_id = #{assessStructId}
+    </select>
+
+    <select id="mGetIloAssessStructByAssessStructIds" resultMap="BaseResultMap">
+        select ilo_id,
+        assess_struct_id,
+        under_expectation,
+        meet_expectation,
+        beyond_expectation,
+        create_time,
+        modify_time
+        from ilo_assess_struct
+        where assess_struct_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert">
+        insert into ilo_assess_struct(ilo_id, assess_struct_id, under_expectation, meet_expectation, beyond_expectation)
+        values (#{iloId}, #{assessStructId}, #{underExpectation}, #{meetExpectation}, #{beyondExpectation})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List">
+        insert into ilo_assess_struct(ilo_id, assess_struct_id, under_expectation, meet_expectation, beyond_expectation)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.iloId}, #{item.assessStructId}, #{item.underExpectation}, #{item.meetExpectation},
+            #{item.beyondExpectation})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update ilo_assess_struct
+        <set>
+            <if test="underExpectation != null and underExpectation != ''">
+                under_expectation = #{underExpectation},
+            </if>
+            <if test="meetExpectation != null and meetExpectation != ''">
+                meet_expectation = #{meetExpectation},
+            </if>
+            <if test="beyondExpectation != null and beyondExpectation != ''">
+                beyond_expectation = #{beyondExpectation},
+            </if>
+        </set>
+        where ilo_id = #{iloId}
+        and assess_struct_id = #{assessStructId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateIloAssessStructDTOs != null">
+            <foreach collection="updateIloAssessStructDTOs" item="item" index="index" separator=";">
+                update ilo_assess_struct
+                <set>
+                    <if test="item.underExpectation != null and item.underExpectation != ''">
+                        under_expectation = #{item.underExpectation},
+                    </if>
+                    <if test="item.meetExpectation != null and item.meetExpectation != ''">
+                        meet_expectation = #{item.meetExpectation},
+                    </if>
+                    <if test="item.beyondExpectation != null and item.beyondExpectation != ''">
+                        beyond_expectation = #{item.beyondExpectation},
+                    </if>
+                </set>
+                where ilo_id = #{item.iloId}
+                and assess_struct_id = #{item.assessStructId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from ilo_assess_struct
+        where ilo_id = #{iloId}
+          and assess_struct_id = #{assessStructId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from ilo_assess_struct
+        where (ilo_id, assess_struct_id) in
+        <foreach collection="deleteIloAssessStructDTOs" item="item" index="index" open="(" close=")" separator=",">
+            (#{item.iloId}, #{item.assessStructId})
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByIloIdOrAssessStructId">
+        <if test="iloIds != null and iloIds.size > 0">
+            delete
+            from ilo_assess_struct
+            where ilo_id in
+            <foreach collection="iloIds" item="item" index="index" open="(" separator="," close=");">
+                #{item}
+            </foreach>
+        </if>
+        <if test="assessStructIds != null and assessStructIds.size > 0">
+            delete
+            from ilo_assess_struct
+            where assess_struct_id in
+            <foreach collection="assessStructIds" item="item" index="index" open="(" separator="," close=");">
+                #{item}
+            </foreach>
+        </if>
+    </delete>
+
+</mapper>

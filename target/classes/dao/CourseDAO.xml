@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.CourseDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Course">
+        <!--@Table course-->
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="curriculumId" column="curriculum_id" jdbcType="INTEGER"/>
+        <result property="courseCode" column="course_code" jdbcType="VARCHAR"/>
+        <result property="semester" column="semester" jdbcType="INTEGER"/>
+        <result property="year" column="year" jdbcType="INTEGER"/>
+        <result property="courseDesc" column="course_desc" jdbcType="VARCHAR"/>
+        <result property="courseStatus" column="course_status" jdbcType="INTEGER"/>
+        <result property="prerequisite" column="prerequisite" jdbcType="VARCHAR"/>
+        <result property="textbook" column="textbook" jdbcType="VARCHAR"/>
+        <result property="refBook" column="ref_book" jdbcType="VARCHAR"/>
+        <result property="courseWebsite" column="course_website" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select course_id,
+               curriculum_id,
+               course_code,
+               semester,
+               year,
+               course_desc,
+               course_status,
+               prerequisite,
+               textbook,
+               ref_book,
+               course_website,
+               create_time,
+               modify_time
+        from course
+        where course_id = #{courseId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select course_id,
+               curriculum_id,
+               course_code,
+               semester,
+               year,
+               course_desc,
+               course_status,
+               prerequisite,
+               textbook,
+               ref_book,
+               course_website,
+               create_time,
+               modify_time
+        from course
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        course_id, curriculum_id, course_code, semester, year, course_desc, course_status, prerequisite, textbook,
+        ref_book, course_website, create_time, modify_time
+        from course
+        <where>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="curriculumId != null">
+                and curriculum_id = #{curriculumId}
+            </if>
+            <if test="courseCode != null and courseCode != ''">
+                and course_code = #{courseCode}
+            </if>
+            <if test="semester != null">
+                and semester = #{semester}
+            </if>
+            <if test="year != null">
+                and year = #{year}
+            </if>
+            <if test="courseDesc != null and courseDesc != ''">
+                and course_desc = #{courseDesc}
+            </if>
+            <if test="courseStatus != null">
+                and course_status = #{courseStatus}
+            </if>
+            <if test="prerequisite != null and prerequisite != ''">
+                and prerequisite = #{prerequisite}
+            </if>
+            <if test="textbook != null and textbook != ''">
+                and textbook = #{textbook}
+            </if>
+            <if test="refBook != null and refBook != ''">
+                and ref_book = #{refBook}
+            </if>
+            <if test="courseWebsite != null and courseWebsite != ''">
+                and course_website = #{courseWebsite}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="courseId" useGeneratedKeys="true">
+        insert into course(curriculum_id, course_code, semester, year, course_desc, course_status,
+                           prerequisite, textbook, ref_book, course_website)
+        values (#{curriculumId}, #{courseCode}, #{semester}, #{year}, #{courseDesc}, #{courseStatus}, #{prerequisite},
+                #{textbook}, #{refBook}, #{courseWebsite})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update course
+        <set>
+            <if test="curriculumId != null">
+                curriculum_id = #{curriculumId},
+            </if>
+            <if test="courseCode != null and courseCode != ''">
+                course_code = #{courseCode},
+            </if>
+            <if test="semester != null">
+                semester = #{semester},
+            </if>
+            <if test="year != null">
+                year = #{year},
+            </if>
+            <if test="courseDesc != null and courseDesc != ''">
+                course_desc = #{courseDesc},
+            </if>
+            <if test="courseStatus != null">
+                course_status = #{courseStatus},
+            </if>
+            <if test="prerequisite != null and prerequisite != ''">
+                prerequisite = #{prerequisite},
+            </if>
+            <if test="textbook != null and textbook != ''">
+                textbook = #{textbook},
+            </if>
+            <if test="refBook != null and refBook != ''">
+                ref_book = #{refBook},
+            </if>
+            <if test="courseWebsite != null and courseWebsite != ''">
+                course_website = #{courseWebsite},
+            </if>
+        </set>
+        where course_id = #{courseId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from course
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bylan.dcybackend.dao.QuestionDAO">
+
+    <resultMap id="QuestKnowlMap" type="com.bylan.dcybackend.vo.QuestionVO">
+        <id column="question_id" property="questionId"/>
+        <result column="question_name" property="questionName"/>
+        <result column="question_desc" property="questionDesc"/>
+        <result column="question_score" property="questionScore"/>
+        <collection property="knowledgeList" ofType="com.bylan.dcybackend.vo.KnowlItemVO" javaType="java.util.List">
+            <!-- 这里使用构造方法注入，String 没有属性-->
+            <result column="knowledge_id" property="knowledgeId"/>
+            <result column="knowledge_number" property="knowledgeNumber"/>
+            <result column="knowledge_desc" property="knowledgeDesc"/>
+        </collection>
+    </resultMap>
+    <resultMap id="scoreDetailMap" type="com.bylan.dcybackend.vo.ScoreDetailVO">
+        <id column="question_id" property="questionId"/>
+        <result column="question_score" property="questionScore"/>
+        <result column="question_name" property="questionName"/>
+        <result column="question_average_score" property="actualScore"/>
+    </resultMap>
+
+    <resultMap id="questionDetailMap" type="com.bylan.dcybackend.vo.QuestionScoreDetailVO">
+        <id column="question_id" property="questionId"/>
+        <result column="question_name" property="questionName"/>
+        <result column="question_desc" property="questionDesc"/>
+    </resultMap>
+
+    <resultMap id="taskScoreMap" type="com.bylan.dcybackend.bo.TaskScoreBO">
+        <result column="task_id" property="taskId"/>
+        <result column="task_score" property="score"/>
+    </resultMap>
+
+    <insert id="mInsertQuestion" parameterType="java.util.List" useGeneratedKeys="true"
+            keyProperty="createQuestionDTOs.questionId">
+        insert into question(
+        task_id,
+        question_name,
+        question_desc,
+        question_score
+        )
+        values
+        <foreach collection="createQuestionDTOs" item="item" index="index" separator=",">
+            (
+            #{item.taskId},
+            #{item.questionName},
+            #{item.questionDesc},
+            #{item.questionScore}
+            )
+        </foreach>
+    </insert>
+
+    <update id="mUpdateQuestion" parameterType="java.util.List">
+        <if test="updateQuestionDTOs!=null">
+            <foreach collection="updateQuestionDTOs" item="item" index="index" separator=";">
+                update question
+                <trim prefix="set" suffixOverrides=",">
+                    <if test="item.questionName!=null">question_name = #{item.questionName},</if>
+                    <if test="item.questionDesc!=null">question_desc = #{item.questionDesc},</if>
+                    <if test="item.questionScore!=null">question_score = #{item.questionScore},</if>
+                </trim>
+                where question_id = #{item.questionId}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateAverageScore">
+        update question
+        set question_average_score = #{averageScore}
+        where question_id = #{questionId}
+    </update>
+
+    <delete id="mDeleteById" parameterType="java.util.List">
+        delete
+        from question
+        where question_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByTaskId">
+        delete
+        from question
+        where question.task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getScoreById" resultType="java.lang.Double">
+        select question_score
+        from question
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getQuestionByTaskId" resultMap="QuestKnowlMap">
+        select question.question_id,
+               question.question_name,
+               question.question_desc,
+               knowledge_point.knowledge_id,
+               knowledge_point.knowledge_number,
+               question.question_score,
+               knowledge_point.knowledge_desc
+        from question,
+             question_knowledge_point,
+             knowledge_point
+        where question.question_id = question_knowledge_point.question_id
+          and question_knowledge_point.knowledge_id = knowledge_point.knowledge_id
+          and question.task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionIdByTaskId" resultType="java.lang.Long">
+        select question_id
+        from question
+        where question.task_id = #{taskId}
+    </select>
+
+    <select id="mGetQuestionIdByTaskIds" resultType="java.lang.Long">
+        select question_id
+        from question
+        where question.task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getQuestionInfoByTaskId" resultType="com.bylan.dcybackend.vo.ScoreDetailVO">
+        select question_id, question_score, question_name
+        from question
+        where question.task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionNumByTaskId" resultType="java.lang.Integer">
+        select count(1)
+        from question
+        where question.task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionDetailByTaskId" resultType="com.bylan.dcybackend.vo.QuestionScoreDetailVO">
+        select question.question_id, question.question_name, question.question_desc, question_score
+        from question
+        where question.task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionAverageScoreByQuestionId" resultType="java.lang.Double">
+        select question_average_score
+        from question
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getTaskIdByQuestionId" resultType="java.lang.Long">
+        select task_id
+        from question
+        where question_id = #{questionId}
+    </select>
+
+    <select id="getStuScoreByTaskIdAndStuId" resultType="java.lang.Double">
+        select sum(question_score)
+        from question_score
+        where task_id = #{taskId}
+          and student_id = #{studentId}
+    </select>
+
+    <select id="getQuestionByKnowledgeIdAndSectionId" resultType="com.bylan.dcybackend.entity.Question">
+        select quest.question_id,
+               quest.task_id,
+               quest.question_name,
+               quest.question_desc,
+               quest.question_score,
+               quest.question_average_score
+        from question_knowledge_point as quest_know
+                 left outer join question as quest
+                                 on quest_know.question_id = quest.question_id
+        where quest_know.knowledge_id = #{knowledgeId}
+          and quest.task_id in
+              (select task_id
+               from task
+               where task.section_id = #{sectionId}
+                 and task.week = #{week}
+                 and task.task_type = #{taskType})
+    </select>
+
+    <select id="mGetQuestionByKnowledgeIdAndSectionId" resultType="com.bylan.dcybackend.entity.Question">
+        select quest.question_id,
+        quest.task_id,
+        quest.question_name,
+        quest.question_desc,
+        quest.question_score,
+        quest.question_average_score
+        from question_knowledge_point as quest_know
+        left outer join question as quest
+        on quest_know.question_id = quest.question_id
+        where quest_know.knowledge_id = #{knowledgeId}
+        and quest.task_id in
+        (select task_id
+        from task
+        where task.section_id = #{sectionId}
+        and task.week = #{week}
+        and task.task_type in
+        <foreach collection="taskType" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+    </select>
+
+    <select id="getByTaskId" resultType="com.bylan.dcybackend.entity.Question">
+        select question_id, question_name, question_desc
+        from question
+        where task_id = #{taskId}
+    </select>
+
+    <select id="getQuestionByAssertTypeAndWeekAndKnowId" resultType="com.bylan.dcybackend.entity.Question">
+        select question_id,question_score
+        from question join task on question.task_id = task.task_id
+        where task.task_status = #{status} and task.task_type = #{assertType} and task.section_id = #{sectionId}
+        and question_id in (
+        select question_id
+        from question_knowledge_point
+        where knowledge_id = #{knowledgeId}
+        )
+        <if test="week != null">
+            and task.week = #{week}
+        </if>
+    </select>
+
+    <select id="getTaskScoreByTaskIds" resultMap="taskScoreMap">
+        select task_id, sum(question_score) as task_score
+        from question
+        where task_id in
+        <foreach collection="taskIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        group by task_id
+    </select>
+
+</mapper>

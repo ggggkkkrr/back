@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.StudentDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Student">
+        <!--@Table student-->
+        <result property="studentId" column="student_id" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="gender" column="gender" jdbcType="INTEGER"/>
+        <result property="phone" column="phone" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="enrollmentYear" column="enrollment_year" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select student_id,
+               name,
+               gender,
+               phone,
+               email,
+               url,
+               enrollment_year,
+               create_time,
+               modify_time
+        from student
+        where student_id = #{studentId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select student_id,
+               name,
+               gender,
+               phone,
+               email,
+               url,
+               enrollment_year,
+               create_time,
+               modify_time
+        from student
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        student_id, name, gender, phone, email, url, enrollment_year, create_time, modify_time
+        from student
+        <where>
+            <if test="studentId != null and studentId != ''">
+                and student_id = #{studentId}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="gender != null">
+                and gender = #{gender}
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="email != null and email != ''">
+                and email = #{email}
+            </if>
+            <if test="url != null and url != ''">
+                and url = #{url}
+            </if>
+            <if test="enrollmentYear != null">
+                and enrollment_year = #{enrollmentYear}
+            </if>
+        </where>
+    </select>
+
+    <select id="getStuInfoBySectionId" resultType="com.bylan.dcybackend.vo.TaskSumVO">
+        select student.student_id, name
+        from student,
+             section_student
+        where student.student_id = section_student.student_id
+          and section_id = #{sectionId}
+    </select>
+
+    <select id="getStuNumBySectionId" resultType="java.lang.Integer">
+        select count(1)
+        from section_student
+        where section_id = #{sectionId}
+    </select>
+    <select id="getNameById" resultType="java.lang.String">
+        select name
+        from student
+        where student_id = #{studentId}
+    </select>
+    <select id="getNumById" resultType="java.lang.Integer">
+        select count(1)
+        from student
+        where student_id = #{userId}
+    </select>
+
+
+    <!--新增所有列-->
+    <insert id="insert">
+        insert into dachengyun.student(student_id, name, gender, phone, email, url, enrollment_year)
+        values (#{studentId}, #{name}, #{gender}, #{phone}, #{email}, #{url}, #{enrollmentYear})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update student
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="url != null and url != ''">
+                url = #{url},
+            </if>
+            <if test="enrollmentYear != null">
+                enrollment_year = #{enrollmentYear},
+            </if>
+        </set>
+        where student_id = #{studentId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from student
+        where student_id = #{studentId}
+    </delete>
+
+</mapper>

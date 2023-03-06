@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.CourseScheduleDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.CourseSchedule">
+        <!--@Table course_schedule-->
+        <result property="scheduleId" column="schedule_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="week" column="week" jdbcType="OTHER"/>
+        <result property="teachingHour" column="teaching_hour" jdbcType="OTHER"/>
+        <result property="teachMode" column="teach_mode" jdbcType="VARCHAR"/>
+        <result property="teachContent" column="teach_content" jdbcType="VARCHAR"/>
+        <result property="ilos" column="ilos" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select schedule_id,
+               course_id,
+               week,
+               teaching_hour,
+               teach_mode,
+               teach_content,
+               ilos,
+               create_time,
+               modify_time
+        from course_schedule
+        where schedule_id = #{scheduleId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select schedule_id,
+               course_id,
+               week,
+               teaching_hour,
+               teach_mode,
+               teach_content,
+               ilos,
+               create_time,
+               modify_time
+        from course_schedule
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        schedule_id, course_id, week, teaching_hour, teach_mode, teach_content, ilos, create_time, modify_time
+        from course_schedule
+        <where>
+            <if test="scheduleId != null">
+                and schedule_id = #{scheduleId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="week != null">
+                and week = #{week}
+            </if>
+            <if test="teachingHour != null">
+                and teaching_hour = #{teachingHour}
+            </if>
+            <if test="teachMode != null and teachMode != ''">
+                and teach_mode = #{teachMode}
+            </if>
+            <if test="teachContent != null and teachContent != ''">
+                and teach_content = #{teachContent}
+            </if>
+            <if test="ilos != null and ilos != ''">
+                and ilos = #{ilos}
+            </if>
+        </where>
+    </select>
+
+    <select id="mGetCourseScheduleByCourseId" resultMap="BaseResultMap">
+        select schedule_id,
+               course_id,
+               week,
+               teaching_hour,
+               teach_mode,
+               teach_content,
+               ilos,
+               create_time,
+               modify_time
+        from course_schedule
+        where course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="scheduleId" useGeneratedKeys="true">
+        insert into course_schedule(course_id, week, teaching_hour, teach_mode, teach_content, ilos)
+        values (#{courseId}, #{week}, #{teachingHour}, #{teachMode}, #{teachContent}, #{ilos})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="scheduleId">
+        insert into course_schedule(course_id, week, teaching_hour, teach_mode, teach_content, ilos)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.week}, #{item.teachingHour}, #{item.teachMode}, #{item.teachContent},
+            #{item.ilos})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update course_schedule
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="week != null">
+                week = #{week},
+            </if>
+            <if test="teachingHour != null">
+                teaching_hour = #{teachingHour},
+            </if>
+            <if test="teachMode != null and teachMode != ''">
+                teach_mode = #{teachMode},
+            </if>
+            <if test="teachContent != null and teachContent != ''">
+                teach_content = #{teachContent},
+            </if>
+            <if test="ilos != null and ilos != ''">
+                ilos = #{ilos},
+            </if>
+        </set>
+        where schedule_id = #{scheduleId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateCourseScheduleDTOs != null">
+            <foreach collection="updateCourseScheduleDTOs" item="item" index="index" separator=";">
+                update course_schedule
+                <set>
+                    <if test="item.week != null">
+                        week = #{item.week},
+                    </if>
+                    <if test="item.teachingHour != null">
+                        teaching_hour = #{item.teachingHour},
+                    </if>
+                    <if test="item.teachMode != null and item.teachMode != ''">
+                        teach_mode = #{item.teachMode},
+                    </if>
+                    <if test="item.teachContent != null and item.teachContent != ''">
+                        teach_content = #{item.teachContent},
+                    </if>
+                    <if test="item.ilos != null and item.ilos != ''">
+                        ilos = #{item.ilos},
+                    </if>
+                </set>
+                where schedule_id = #{item.scheduleId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from course_schedule
+        where schedule_id = #{scheduleId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from course_schedule
+        where schedule_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByCourseId">
+        delete
+        from course_schedule
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

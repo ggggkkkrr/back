@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.TeachStructDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.TeachStruct">
+        <!--@Table teach_struct-->
+        <result property="teachStructId" column="teach_struct_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="teachStructDesc" column="teach_struct_desc" jdbcType="VARCHAR"/>
+        <result property="inClassHour" column="in_class_hour" jdbcType="OTHER"/>
+        <result property="afterClassHour" column="after_class_hour" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select teach_struct_id,
+               course_id,
+               teach_struct_desc,
+               in_class_hour,
+               after_class_hour,
+               create_time,
+               modify_time
+        from teach_struct
+        where teach_struct_id = #{teachStructId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select teach_struct_id,
+               course_id,
+               teach_struct_desc,
+               in_class_hour,
+               after_class_hour,
+               create_time,
+               modify_time
+        from teach_struct
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        teach_struct_id, course_id, teach_struct_desc, in_class_hour, after_class_hour, create_time, modify_time
+        from teach_struct
+        <where>
+            <if test="teachStructId != null">
+                and teach_struct_id = #{teachStructId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="teachStructDesc != null and teachStructDesc != ''">
+                and teach_struct_desc = #{teachStructDesc}
+            </if>
+            <if test="inClassHour != null">
+                and in_class_hour = #{inClassHour}
+            </if>
+            <if test="afterClassHour != null">
+                and after_class_hour = #{afterClassHour}
+            </if>
+        </where>
+    </select>
+
+    <select id="mGetTeachStructByCourseId" resultMap="BaseResultMap">
+        select teach_struct_id,
+               course_id,
+               teach_struct_desc,
+               in_class_hour,
+               after_class_hour,
+               create_time,
+               modify_time
+        from teach_struct
+        where course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="teachStructId" useGeneratedKeys="true">
+        insert into teach_struct(course_id, teach_struct_desc, in_class_hour, after_class_hour)
+        values (#{courseId}, #{teachStructDesc}, #{inClassHour}, #{afterClassHour})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="teachStructId">
+        insert into teach_struct(course_id, teach_struct_desc, in_class_hour, after_class_hour)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.teachStructDesc}, #{item.inClassHour}, #{item.afterClassHour})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update teach_struct
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="teachStructDesc != null and teachStructDesc != ''">
+                teach_struct_desc = #{teachStructDesc},
+            </if>
+            <if test="inClassHour != null">
+                in_class_hour = #{inClassHour},
+            </if>
+            <if test="afterClassHour != null">
+                after_class_hour = #{afterClassHour},
+            </if>
+        </set>
+        where teach_struct_id = #{teachStructId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateTeachStructDTOs != null">
+            <foreach collection="updateTeachStructDTOs" item="item" index="index" separator=";">
+                update teach_struct
+                <set>
+                    <if test="item.teachStructDesc != null and item.teachStructDesc != ''">
+                        teach_struct_desc = #{item.teachStructDesc},
+                    </if>
+                    <if test="item.inClassHour != null">
+                        in_class_hour = #{item.inClassHour},
+                    </if>
+                    <if test="item.afterClassHour != null">
+                        after_class_hour = #{item.afterClassHour},
+                    </if>
+                </set>
+                where teach_struct_id = #{item.teachStructId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from teach_struct
+        where teach_struct_id = #{teachStructId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from teach_struct
+        where teach_struct_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByCourseId">
+        delete
+        from teach_struct
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

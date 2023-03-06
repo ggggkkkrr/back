@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.IloDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Ilo">
+        <!--@Table ilo-->
+        <result property="iloId" column="ilo_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="iloNumber" column="ilo_number" jdbcType="VARCHAR"/>
+        <result property="iloDesc" column="ilo_desc" jdbcType="VARCHAR"/>
+        <result property="initialLevel" column="initial_level" jdbcType="VARCHAR"/>
+        <result property="achieveLevel" column="achieve_level" jdbcType="VARCHAR"/>
+        <result property="iloWeight" column="ilo_weight" jdbcType="NUMERIC"/>
+        <result property="l3Id" column="l3_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select ilo_id,
+               course_id,
+               ilo_number,
+               ilo_desc,
+               initial_level,
+               achieve_level,
+               ilo_weight,
+               l3_id,
+               create_time,
+               modify_time
+        from ilo
+        where ilo_id = #{iloId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select ilo_id,
+               course_id,
+               ilo_number,
+               ilo_desc,
+               initial_level,
+               achieve_level,
+               ilo_weight,
+               l3_id,
+               create_time,
+               modify_time
+        from ilo
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        ilo_id,
+        course_id,
+        ilo_number,
+        ilo_desc,
+        initial_level,
+        achieve_level,
+        ilo_weight,
+        l3_id,
+        create_time,
+        modify_time
+        from ilo
+        <where>
+            <if test="iloId != null">
+                and ilo_id = #{iloId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="iloNumber != null and iloNumber != ''">
+                and ilo_number = #{iloNumber}
+            </if>
+            <if test="iloDesc != null and iloDesc != ''">
+                and ilo_desc = #{iloDesc}
+            </if>
+            <if test="initialLevel != null and initialLevel != ''">
+                and initial_level = #{initialLevel}
+            </if>
+            <if test="achieveLevel != null and achieveLevel != ''">
+                and achieve_level = #{achieveLevel}
+            </if>
+            <if test="iloWeight != null">
+                and iloWeight = #{iloWeight}
+            </if>
+            <if test="l3Id != null">
+                and l3_id = #{l3Id}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryAllByCourseId" resultType="java.lang.Long">
+        select ilo_id
+        from ilo
+        where course_id = #{courseId}
+    </select>
+
+    <select id="mGetIloByCourseId" resultMap="BaseResultMap">
+        select ilo_id,
+               course_id,
+               ilo_number,
+               ilo_desc,
+               initial_level,
+               achieve_level,
+               ilo_weight,
+               l3_id,
+               create_time,
+               modify_time
+        from ilo
+        where course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="iloId" useGeneratedKeys="true">
+        insert into ilo(course_id, ilo_number, ilo_desc, initial_level, achieve_level, ilo_weight, l3_id)
+        values (#{courseId}, #{iloNumber}, #{iloDesc}, #{initialLevel}, #{achieveLevel}, #{iloWeight}, #{l3Id})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="iloId">
+        insert into ilo(course_id, ilo_number, ilo_desc, initial_level, achieve_level, ilo_weight, l3_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.iloNumber}, #{item.iloDesc}, #{item.initialLevel}, #{item.achieveLevel},
+            #{item.iloWeight}, #{item.l3Id})
+        </foreach>
+    </insert>
+
+    <insert id="mInsertByIloBo"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="iloId">
+        insert into ilo(course_id, ilo_number, ilo_desc, initial_level, achieve_level, ilo_weight, l3_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.iloNumber}, #{item.iloDesc}, #{item.initialLevel}, #{item.achieveLevel},
+            #{item.iloWeight}, #{item.l3Id})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update ilo
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="iloNumber != null and iloNumber != ''">
+                ilo_number = #{iloNumber},
+            </if>
+            <if test="iloDesc != null and iloDesc != ''">
+                ilo_desc = #{iloDesc},
+            </if>
+            <if test="initialLevel != null and initialLevel != ''">
+                initial_level = #{initialLevel},
+            </if>
+            <if test="achieveLevel != null and achieveLevel != ''">
+                achieve_level = #{achieveLevel},
+            </if>
+            <if test="iloWeight != null">
+                iloWeight = #{iloWeight},
+            </if>
+            <if test="l3Id != null">
+                l3_id = #{l3Id},
+            </if>
+        </set>
+        where ilo_id = #{iloId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateIloDTOs != null">
+            <foreach collection="updateIloDTOs" item="item" index="index" separator=";">
+                update ilo
+                <set>
+                    <if test="item.iloNumber != null and item.iloNumber != ''">
+                        ilo_number = #{item.iloNumber},
+                    </if>
+                    <if test="item.iloDesc != null and item.iloDesc != ''">
+                        ilo_desc = #{item.iloDesc},
+                    </if>
+                    <if test="item.initialLevel != null and item.initialLevel != ''">
+                        initial_level = #{item.initialLevel},
+                    </if>
+                    <if test="item.achieveLevel != null and item.achieveLevel != ''">
+                        achieve_level = #{item.achieveLevel},
+                    </if>
+                    <if test="item.iloWeight != null">
+                        ilo_weight = #{item.iloWeight},
+                    </if>
+                    <if test="item.l3Id != null">
+                        l3_id = #{item.l3Id},
+                    </if>
+                </set>
+                where ilo_id = #{item.iloId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from ilo
+        where ilo_id = #{iloId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from ilo
+        where ilo_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByCourseId">
+        delete
+        from ilo
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

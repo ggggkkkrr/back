@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.ExperimentDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Experiment">
+        <!--@Table experiment-->
+        <result property="experimentId" column="experiment_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="experimentNumber" column="experiment_number" jdbcType="VARCHAR"/>
+        <result property="experimentDesc" column="experiment_desc" jdbcType="VARCHAR"/>
+        <result property="classHour" column="class_hour" jdbcType="OTHER"/>
+        <result property="contentTarget" column="content_target" jdbcType="VARCHAR"/>
+        <result property="task" column="task" jdbcType="VARCHAR"/>
+        <result property="assessmentForm" column="assessment_form" jdbcType="VARCHAR"/>
+        <result property="scoreStandard" column="score_standard" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select experiment_id,
+               course_id,
+               experiment_number,
+               experiment_desc,
+               class_hour,
+               content_target,
+               task,
+               assessment_form,
+               score_standard,
+               remark,
+               create_time,
+               modify_time
+        from experiment
+        where experiment_id = #{experimentId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select experiment_id,
+               course_id,
+               experiment_number,
+               experiment_desc,
+               class_hour,
+               content_target,
+               task,
+               assessment_form,
+               score_standard,
+               remark,
+               create_time,
+               modify_time
+        from experiment
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        experiment_id, course_id, experiment_number, experiment_desc, class_hour, content_target, task, assessment_form,
+        score_standard, remark, create_time, modify_time
+        from experiment
+        <where>
+            <if test="experimentId != null">
+                and experiment_id = #{experimentId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="experimentNumber != null and experimentNumber != ''">
+                and experiment_number = #{experimentNumber}
+            </if>
+            <if test="experimentDesc != null and experimentDesc != ''">
+                and experiment_desc = #{experimentDesc}
+            </if>
+            <if test="classHour != null">
+                and class_hour = #{classHour}
+            </if>
+            <if test="contentTarget != null and contentTarget != ''">
+                and content_target = #{contentTarget}
+            </if>
+            <if test="task != null and task != ''">
+                and task = #{task}
+            </if>
+            <if test="comment != null and comment != ''">
+                and remark = #{remark}
+            </if>
+            <if test="assessmentForm != null and assessmentForm != ''">
+                and assessment_form = #{assessmentForm}
+            </if>
+            <if test="scoreStandard != null and scoreStandard != ''">
+                and score_standard = #{scoreStandard}
+            </if>
+        </where>
+    </select>
+
+    <select id="mGetExperimentByCourseId" resultMap="BaseResultMap">
+        select experiment_id,
+               course_id,
+               experiment_number,
+               experiment_desc,
+               class_hour,
+               content_target,
+               task,
+               assessment_form,
+               score_standard,
+               remark,
+               create_time,
+               modify_time
+        from experiment
+        where course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="experimentId" useGeneratedKeys="true">
+        insert into experiment(course_id, experiment_number, experiment_desc, class_hour, content_target, task,
+                               assessment_form, score_standard, remark)
+        values (#{courseId}, #{experimentNumber}, #{experimentDesc}, #{classHour}, #{contentTarget}, #{task},
+                #{assessmentForm}, #{scoreStandard}, #{remark})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="experimentId">
+        insert into experiment(course_id, experiment_number, experiment_desc, class_hour, content_target, task,
+        assessment_form, score_standard, remark)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.courseId}, #{item.experimentNumber}, #{item.experimentDesc}, #{item.classHour},
+            #{item.contentTarget}, #{item.task}, #{item.assessmentForm}, #{item.scoreStandard}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update experiment
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="experimentNumber != null and experimentNumber != ''">
+                experiment_number = #{experimentNumber},
+            </if>
+            <if test="experimentDesc != null and experimentDesc != ''">
+                experiment_desc = #{experimentDesc},
+            </if>
+            <if test="classHour != null">
+                class_hour = #{classHour},
+            </if>
+            <if test="contentTarget != null and contentTarget != ''">
+                content_target = #{contentTarget},
+            </if>
+            <if test="task != null and task != ''">
+                task = #{task},
+            </if>
+            <if test="assessmentForm != null and assessmentForm != ''">
+                assessment_form = #{assessmentForm},
+            </if>
+            <if test="scoreStandard != null and scoreStandard != ''">
+                score_standard = #{scoreStandard},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark}
+            </if>
+        </set>
+        where experiment_id = #{experimentId}
+    </update>
+
+    <update id="mUpdate">
+        <if test="updateExperimentDTOs != null">
+            <foreach collection="updateExperimentDTOs" item="item" index="index" separator=";">
+                update experiment
+                <set>
+                    <if test="item.experimentNumber != null and item.experimentNumber != ''">
+                        experiment_number = #{item.experimentNumber},
+                    </if>
+                    <if test="item.experimentDesc != null and item.experimentDesc != ''">
+                        experiment_desc = #{item.experimentDesc},
+                    </if>
+                    <if test="item.classHour != null">
+                        class_hour = #{item.classHour},
+                    </if>
+                    <if test="item.contentTarget != null and item.contentTarget != ''">
+                        content_target = #{item.contentTarget},
+                    </if>
+                    <if test="item.task != null and item.task != ''">
+                        task = #{item.task},
+                    </if>
+                    <if test="item.assessmentForm != null and item.assessmentForm != ''">
+                        assessment_form = #{item.assessmentForm},
+                    </if>
+                    <if test="item.scoreStandard != null and item.scoreStandard != ''">
+                        score_standard = #{item.scoreStandard},
+                    </if>
+                    <if test="item.remark != null and item.remark != ''">
+                        remark = #{item.remark},
+                    </if>
+                </set>
+                where experiment_id = #{item.experimentId}
+            </foreach>
+        </if>
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from experiment
+        where experiment_id = #{experimentId}
+    </delete>
+
+    <delete id="mDeleteById">
+        delete
+        from experiment
+        where experiment_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="mDeleteByCourseId">
+        delete
+        from experiment
+        where course_id = #{courseId}
+    </delete>
+
+</mapper>

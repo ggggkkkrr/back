@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.ChatMessageDAO">
+
+    <resultMap id="historyMap" type="com.bylan.dcybackend.vo.MessageVO">
+        <result column="message_id" property="messageId"></result>
+        <result column="to_id" property="toId"></result>
+        <result column="content" property="content"></result>
+        <result column="message_type" property="messageType"></result>
+        <result column="from_id" property="fromId"></result>
+        <result column="from_name" property="fromName"></result>
+        <result column="message_status" property="messageStatus"></result>
+        <result column="create_time" property="createTime"></result>
+    </resultMap>
+
+    <insert id="createChatMessage" parameterType="com.bylan.dcybackend.entity.ChatMessage"
+            useGeneratedKeys="true"
+            keyProperty="messageId">
+        insert into chat_message(
+        section_id, to_id, content, message_type, from_id, from_name, message_status, create_time
+        )
+        values(
+               #{sectionId},
+               #{toId},
+               #{content},
+               #{messageType},
+               #{fromId},
+               #{fromName},
+               #{messageStatus},
+               #{createTime}
+              )
+    </insert>
+
+    <update id="deleteMessage">
+        update chat_message
+        set message_status = #{status}
+        where message_id = #{messageId}
+    </update>
+
+    <select id="getGroupHistory" resultMap="historyMap">
+        select message_id, to_id, content, message_type, from_id, from_name, message_status, create_time
+        from chat_message
+        where section_id = #{sectionId} and to_id = #{toId}
+        <if test="startMsgId!=null">
+            and #{startMsgId} > message_id
+        </if>
+        order by message_id desc
+        limit #{size}
+    </select>
+    <select id="getFriendHistory" resultMap="historyMap">
+        select message_id, to_id, content, message_type, from_id, from_name, message_status, create_time
+        from chat_message
+        where section_id = #{sectionId} and ( to_id = #{toId} and from_id = #{fromId} or to_id = #{fromId} and from_id = #{toId})
+            <if test="startMsgId!=null">
+                and #{startMsgId} > message_id
+            </if>
+        order by message_id desc
+        limit #{size}
+    </select>
+    <select id="getPersonMsgNum" resultType="java.lang.Integer">
+        select count(1)
+        from chat_message
+        where section_id = #{sectionId} and to_id = #{toId} and from_id = #{fromId}
+                <if test="readTime!=null">
+                    and create_time > #{readTime}
+                </if>
+           or section_id = #{sectionId} and to_id = #{fromId} and from_id = #{toId}
+                <if test="readTime!=null">
+                    and create_time > #{readTime}
+                </if>
+    </select>
+    <select id="getGroupMsgNum" resultType="java.lang.Integer">
+        select count(1)
+        from chat_message
+        where section_id = #{sectionId} and to_id = 0
+            <if test="groupReadTime!=null">
+                and create_time > #{groupReadTime}
+            </if>
+    </select>
+</mapper>

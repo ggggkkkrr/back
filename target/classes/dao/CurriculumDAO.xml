@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.CurriculumDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Curriculum">
+        <!--@Table curriculum-->
+        <result property="curriculumId" column="curriculum_id" jdbcType="INTEGER"/>
+        <result property="curriculumCode" column="curriculum_code" jdbcType="VARCHAR"/>
+        <result property="setupYear" column="setup_year" jdbcType="INTEGER"/>
+        <result property="curriculumName" column="curriculum_name" jdbcType="VARCHAR"/>
+        <result property="curriculumDesc" column="curriculum_desc" jdbcType="VARCHAR"/>
+        <result property="curriculumStatus" column="curriculum_status" jdbcType="INTEGER"/>
+        <result property="curriculumType" column="curriculum_type" jdbcType="INTEGER"/>
+        <result property="majorId" column="major_id" jdbcType="INTEGER"/>
+        <result property="credit" column="credit" jdbcType="NUMERIC"/>
+        <result property="learningHour" column="learning_hour" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select curriculum_id,
+               curriculum_code,
+               setup_year,
+               curriculum_name,
+               curriculum_desc,
+               curriculum_status,
+               curriculum_type,
+               major_id,
+               credit,
+               learning_hour,
+               create_time,
+               modify_time
+        from curriculum
+        where curriculum_id = #{curriculumId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select curriculum_id,
+               curriculum_code,
+               setup_year,
+               curriculum_name,
+               curriculum_desc,
+               curriculum_status,
+               curriculum_type,
+               major_id,
+               credit,
+               learning_hour,
+               create_time,
+               modify_time
+        from curriculum
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select curriculum_id, curriculum_code, setup_year, curriculum_name, curriculum_desc, curriculum_status,
+        curriculum_type, major_id, credit, learning_hour, create_time, modify_time
+        from curriculum
+        <where>
+            <if test="curriculumId != null">
+                and curriculum_id = #{curriculumId}
+            </if>
+            <if test="curriculumCode != null and curriculumCode != ''">
+                and curriculum_code = #{curriculumCode}
+            </if>
+            <if test="setupYear != null">
+                and setup_year = #{setupYear}
+            </if>
+            <if test="curriculumName != null and curriculumName != ''">
+                and curriculum_name = #{curriculumName}
+            </if>
+            <if test="curriculumDesc != null and curriculumDesc != ''">
+                and curriculum_desc = #{curriculumDesc}
+            </if>
+            <if test="curriculumStatus != null">
+                and curriculum_status = #{curriculumStatus}
+            </if>
+            <if test="curriculumType != null">
+                and curriculum_type = #{curriculumType}
+            </if>
+            <if test="majorId != null">
+                and major_id = {majorId}
+            </if>
+            <if test="credit != null">
+                and credit = #{credit}
+            </if>
+            <if test="learningHour != null">
+                and learning_hour = #{learningHour}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="curriculumId" useGeneratedKeys="true">
+        insert into curriculum(curriculum_code, setup_year, curriculum_name, curriculum_desc, curriculum_status,
+                               curriculum_type, major_id, credit, learning_hour)
+        values (#{curriculumCode}, #{setupYear}, #{curriculumName}, #{curriculumDesc}, #{curriculumStatus},
+                #{curriculumType}, #{majorId}, #{credit}, #{learningHour})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update curriculum
+        <set>
+            <if test="curriculumCode != null and curriculumCode != ''">
+                curriculum_code = #{curriculumCode},
+            </if>
+            <if test="setupYear != null">
+                setup_year = #{setupYear},
+            </if>
+            <if test="curriculumName != null and curriculumName != ''">
+                curriculum_name = #{curriculumName},
+            </if>
+            <if test="curriculumDesc != null and curriculumDesc != ''">
+                curriculum_desc = #{curriculumDesc},
+            </if>
+            <if test="curriculumStatus != null">
+                curriculum_status = #{curriculumStatus},
+            </if>
+            <if test="curriculumType != null">
+                curriculum_type = #{curriculumType}
+            </if>
+            <if test="majorId != null">
+                major_id = {majorId}
+            </if>
+            <if test="credit != null">
+                credit = #{credit}
+            </if>
+            <if test="learningHour != null">
+                learning_hour = #{learningHour}
+            </if>
+        </set>
+        where curriculum_id = #{curriculumId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from curriculum
+        where curriculum_id = #{curriculumId}
+    </delete>
+
+</mapper>

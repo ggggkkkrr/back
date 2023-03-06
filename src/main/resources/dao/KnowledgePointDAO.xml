@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.KnowledgePointDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.KnowledgePoint">
+        <!--@Table knowledge_point-->
+        <result property="knowledgeId" column="knowledge_id" jdbcType="INTEGER"/>
+        <result property="iloId" column="ilo_id" jdbcType="INTEGER"/>
+        <result property="knowledgeNumber" column="knowledge_number" jdbcType="VARCHAR"/>
+        <result property="knowledgeWeight" column="knowledge_weight" jdbcType="DOUBLE"/>
+        <result property="knowledgeDesc" column="knowledge_desc" jdbcType="VARCHAR"/>
+        <result property="expectedScore" column="expected_score" javaType="DOUBLE"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="IloKnowlResultMap" type="com.bylan.dcybackend.vo.KnowlListVO">
+        <id column="ilo_id" property="iloId"/>
+        <result column="ilo_number" property="iloNumber"/>
+        <result column="ilo_desc" property="iloDesc"/>
+        <collection property="knowlItemVOList" ofType="com.bylan.dcybackend.vo.KnowlItemVO">
+            <id column="knowledge_id" property="knowledgeId"/>
+            <result column="knowledge_number" property="knowledgeNumber"/>
+            <result column="knowledge_desc" property="knowledgeDesc"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="CourseProgressViewResultMap" type="com.bylan.dcybackend.vo.CourseProgressViewVO">
+        <id property="courseId" column="course_id"/>
+        <result property="courseReach" column="course_reach"/>
+        <collection property="iloProgresses" ofType="com.bylan.dcybackend.vo.IloProgressViewVO"
+                    resultMap="IloProgressViewResultMap"/>
+    </resultMap>
+
+    <resultMap id="IloProgressViewResultMap" type="com.bylan.dcybackend.vo.IloProgressViewVO">
+        <id property="iloId" column="ilo_id"/>
+        <result property="iloNumber" column="ilo_number"/>
+        <result property="iloDesc" column="ilo_desc"/>
+        <result property="iloReach" column="ilo_reach"/>
+        <result property="iloWeight" column="ilo_weight"/>
+        <collection property="knowledgeProgresses" ofType="com.bylan.dcybackend.vo.KnowledgeProgressViewVO"
+                    resultMap="KnowledgeProgressViewResultMap"/>
+    </resultMap>
+
+    <resultMap id="KnowledgeProgressViewResultMap" type="com.bylan.dcybackend.vo.KnowledgeProgressViewVO">
+        <id property="knowledgeId" column="knowledge_id"/>
+        <result property="knowledgeNumber" column="knowledge_number"/>
+        <result property="knowledgeDesc" column="knowledge_desc"/>
+        <result property="knowledgeReach" column="knowledge_reach"/>
+        <result property="knowledgeWeight" column="knowledge_weight"/>
+        <collection property="assessItems" ofType="com.bylan.dcybackend.vo.AssessItemViewVO">
+            <id property="assessStructId" column="assess_struct_id"/>
+            <result property="assessStructDesc" column="assess_struct_desc"/>
+            <result property="assessStructWeight" column="assess_struct_weight"/>
+        </collection>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select knowledge_id,
+               ilo_id,
+               knowledge_number,
+               knowledge_weight,
+               knowledge_desc,
+               expected_score,
+               create_time,
+               modify_time
+        from knowledge_point
+        where knowledge_id = #{knowledgeId}
+    </select>
+
+    <select id="mGetKnowledgePointByIloId" resultMap="BaseResultMap">
+        select knowledge_id,
+               ilo_id,
+               knowledge_number,
+               knowledge_weight,
+               knowledge_desc,
+               expected_score,
+               create_time,
+               modify_time
+        from knowledge_point
+        where ilo_id = #{iloId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select knowledge_id,
+               ilo_id,
+               knowledge_number,
+               knowledge_weight,
+               knowledge_desc,
+               expected_score,
+               create_time,
+               modify_time
+        from knowledge_point
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        knowledge_id, ilo_id, knowledge_number, knowledge_weight, knowledge_desc, create_time, modify_time
+        from knowledge_point
+        <where>
+            <if test="knowledgeId != null">
+                and knowledge_id = #{knowledgeId}
+            </if>
+            <if test="iloId != null">
+                and ilo_id = #{iloId}
+            </if>
+            <if test="knowledgeNumber != null and knowledgeNumber != ''">
+                and knowledge_number = #{knowledgeNumber}
+            </if>
+            <if test="knowledgeWeight != null">
+                and knowledge_weight = #{knowledgeWeight}
+            </if>
+            <if test="expectedScore != null">
+                and expected_score = #{expectedScore}
+            </if>
+            <if test="knowledgeDesc != null and knowledgeDesc != ''">
+                and knowledge_desc = #{knowledgeDesc}
+            </if>
+        </where>
+    </select>
+
+    <!--    查询该课程下所有知识点-->
+    <select id="mGetKnowledgeByCourseId" resultMap="IloKnowlResultMap">
+        select ilo.ilo_id,
+               ilo.ilo_number,
+               ilo.ilo_desc,
+               knowledge_point.knowledge_id,
+               knowledge_point.knowledge_number,
+               knowledge_point.knowledge_desc
+        from ilo,
+             knowledge_point
+        where ilo.ilo_id = knowledge_point.ilo_id
+          and ilo.course_id = #{courseId}
+
+    </select>
+
+    <select id="queryAllKeysByIloId" resultType="java.lang.Long">
+        select knowledge_id
+        from knowledge_point
+        where ilo_id in
+        <foreach collection="iloIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="mGetIloIdByKnowledgeId" resultType="java.lang.Long">
+        select ilo_id
+        from knowledge_point
+        where knowledge_id in
+        <foreach collection="knowledgeIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- kpa为某一周所考核的知识点，以及其考核项目 -->
+    <select id="mGetCourseProgressViewByCourseIdAndWeek"
+            resultMap="CourseProgressViewResultMap">
+        with kpa as (select distinct knowledge_id, assess_struct_id, assess_struct_desc, assess_struct_weight
+                     from question_knowledge_point as qkp
+                              inner join (select question_id, assess_struct_id, assess_struct_desc, assess_struct_weight
+                                          from question
+                                                   left outer join task on question.task_id = task.task_id
+                                                   left outer join assess_struct as `as` on task.task_type = `as`.assess_struct_id
+                                          where task.week = #{week}) as qt on qkp.question_id = qt.question_id)
+        select ilo.course_id,
+               ilo.ilo_id,
+               ilo.ilo_number,
+               ilo.ilo_desc,
+               ilo.ilo_weight,
+               kp.knowledge_id,
+               kp.knowledge_number,
+               kp.knowledge_desc,
+               kp.knowledge_weight,
+               kpa.assess_struct_id,
+               kpa.assess_struct_weight,
+               kpa.assess_struct_desc
+        from ilo
+                 left outer join knowledge_point as kp on ilo.ilo_id = kp.ilo_id
+                 inner join kpa on kp.knowledge_id = kpa.knowledge_id
+        where ilo.course_id = #{courseId}
+    </select>
+
+    <select id="mGetAccumulatedCourseProgressViewByCourseIdAndWeek"
+            resultMap="CourseProgressViewResultMap">
+        with kpa as (select distinct knowledge_id, assess_struct_id, assess_struct_desc, assess_struct_weight
+                     from question_knowledge_point as qkp
+                              inner join (select question_id, assess_struct_id, assess_struct_desc, assess_struct_weight
+                                          from question
+                                                   left outer join task on question.task_id = task.task_id
+                                                   left outer join assess_struct as `as` on task.task_type = `as`.assess_struct_id
+                                          where task.week &lt;= #{week}) as qt on qkp.question_id = qt.question_id)
+        select ilo.course_id,
+               ilo.ilo_id,
+               ilo.ilo_number,
+               ilo.ilo_desc,
+               ilo.ilo_weight,
+               kp.knowledge_id,
+               kp.knowledge_number,
+               kp.knowledge_desc,
+               kp.knowledge_weight,
+               kpa.assess_struct_id,
+               kpa.assess_struct_weight,
+               kpa.assess_struct_desc
+        from ilo
+                 left outer join knowledge_point as kp on ilo.ilo_id = kp.ilo_id
+                 inner join kpa on kp.knowledge_id = kpa.knowledge_id
+        where ilo.course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="knowledgeId" useGeneratedKeys="true">
+        insert into knowledge_point(ilo_id, knowledge_number, knowledge_weight, knowledge_desc, expected_score)
+        values (#{iloId}, #{knowledgeNumber}, #{knowledgeWeight}, #{knowledgeDesc}, #{expectedScore})
+    </insert>
+
+    <insert id="mInsert"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="knowledgeId">
+        insert into knowledge_point(ilo_id, knowledge_number, knowledge_weight, knowledge_desc, expected_score)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.iloId}, #{item.knowledgeNumber}, #{item.knowledgeWeight}, #{item.knowledgeDesc},
+            #{item.expectedScore})
+        </foreach>
+    </insert>
+
+    <insert id="mInsertByIloBo"
+            parameterType="java.util.List"
+            useGeneratedKeys="true"
+            keyProperty="knowledgeId">
+        insert into knowledge_point(ilo_id, knowledge_number, knowledge_weight, knowledge_desc, expected_score)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.iloId}, #{item.knowledgeNumber}, #{item.knowledgeWeight}, #{item.knowledgeDesc},
+            #{item.expectedScore})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update knowledge_point
+        <set>
+            <if test="iloId != null">
+                ilo_id = #{iloId},
+            </if>
+            <if test="knowledgeNumber != null and knowledgeNumber != ''">
+                knowledge_number = #{knowledgeNumber},
+            </if>
+            <if test="knowledgeWeight != null">
+                knowledge_weight = #{knowledgeWeight},
+            </if>
+            <if test="knowledgeDesc != null and knowledgeDesc != ''">
+                knowledge_desc = #{knowledgeDesc},
+            </if>
+            <if test="expectedScore != null">
+                and expected_score = #{expectedScore}
+            </if>
+        </set>
+        where knowledge_id = #{knowledgeId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from knowledge_point
+        where knowledge_id = #{knowledgeId}
+    </delete>
+
+    <delete id="mDeleteByIloId">
+        delete
+        from knowledge_point
+        where ilo_id in
+        <foreach collection="iloIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

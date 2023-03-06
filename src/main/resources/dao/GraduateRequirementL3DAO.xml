@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.GraduateRequirementL3DAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.GraduateRequirementL3">
+        <!--@Table graduate_requirement_l3-->
+        <result property="l3Id" column="l3_id" jdbcType="INTEGER"/>
+        <result property="l3Desc" column="l3_desc" jdbcType="VARCHAR"/>
+        <result property="l3Weight" column="l3_weight" jdbcType="OTHER"/>
+        <result property="l2Id" column="l2_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select l3_id,
+               l3_desc,
+               l3_weight,
+               l2_id,
+               create_time,
+               modify_time
+        from graduate_requirement_l3
+        where l3_id = #{l3Id}
+    </select>
+
+    <select id="queryByL2Id" resultMap="BaseResultMap">
+        select l3_id, l3_desc, l3_weight, l2_id, create_time, modify_time
+        from graduate_requirement_l3
+        where l2_id = #{l2Id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select l3_id,
+               l3_desc,
+               l3_weight,
+               l2_id,
+               create_time,
+               modify_time
+        from graduate_requirement_l3
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        l3_id, l3_desc, l3_weight, l2_id, create_time, modify_time
+        from graduate_requirement_l3
+        <where>
+            <if test="l3Id != null">
+                and l3_id = #{l3Id}
+            </if>
+            <if test="l3Desc != null and l3Desc != ''">
+                and l3_desc = #{l3Desc}
+            </if>
+            <if test="l3Weight != null">
+                and l3_weight = #{l3Weight}
+            </if>
+            <if test="l2Id != null">
+                and l2_id = #{l2Id}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="l3Id" useGeneratedKeys="true">
+        insert into graduate_requirement_l3(l3_desc, l3_weight, l2_id)
+        values (#{l3Desc}, #{l3Weight}, #{l2Id})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update graduate_requirement_l3
+        <set>
+            <if test="l3Desc != null and l3Desc != ''">
+                l3_desc = #{l3Desc},
+            </if>
+            <if test="l3Weight != null">
+                l3_weight = #{l3Weight},
+            </if>
+            <if test="l2Id != null">
+                l2_id = #{l2Id},
+            </if>
+        </set>
+        where l3_id = #{l3Id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from graduate_requirement_l3
+        where l3_id = #{l3Id}
+    </delete>
+
+</mapper>

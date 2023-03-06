@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.ClassDao">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Class">
+        <!--@Table class-->
+        <result property="classId" column="class_id" jdbcType="INTEGER"/>
+        <result property="majorId" column="major_id" jdbcType="INTEGER"/>
+        <result property="className" column="class_name" jdbcType="VARCHAR"/>
+        <result property="teacherId" column="teacher_id" jdbcType="VARCHAR"/>
+        <result property="createYear" column="create_year" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select
+          class_id, major_id, class_name, teacher_id, create_year, create_time, modify_time
+        from dachengyun.class
+        where class_id = #{classId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select
+          class_id, major_id, class_name, teacher_id, create_year, create_time, modify_time
+        from dachengyun.class
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+          class_id, major_id, class_name, teacher_id, create_year, create_time, modify_time
+        from dachengyun.class
+        <where>
+            <if test="classId != null">
+                and class_id = #{classId}
+            </if>
+            <if test="majorId != null">
+                and major_id = #{majorId}
+            </if>
+            <if test="className != null and className != ''">
+                and class_name = #{className}
+            </if>
+            <if test="teacherId != null and teacherId != ''">
+                and teacher_id = #{teacherId}
+            </if>
+            <if test="createYear != null">
+                and create_year = #{createYear}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="modifyTime != null">
+                and modify_time = #{modifyTime}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="classId" useGeneratedKeys="true">
+        insert into dachengyun.class(major_id, class_name, teacher_id, create_year, create_time, modify_time)
+        values (#{majorId}, #{className}, #{teacherId}, #{createYear}, #{createTime}, #{modifyTime})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update dachengyun.class
+        <set>
+            <if test="majorId != null">
+                major_id = #{majorId},
+            </if>
+            <if test="className != null and className != ''">
+                class_name = #{className},
+            </if>
+            <if test="teacherId != null and teacherId != ''">
+                teacher_id = #{teacherId},
+            </if>
+            <if test="createYear != null">
+                create_year = #{createYear},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime},
+            </if>
+        </set>
+        where class_id = #{classId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from dachengyun.class where class_id = #{classId}
+    </delete>
+
+</mapper>

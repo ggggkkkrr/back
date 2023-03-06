@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.ChatMessageStateDAO">
+    <insert id="updateReadTime">
+        replace into chat_message_state(to_id, from_id, section_id, read_time) values (
+            #{fromId}, #{toId}, #{sectionId}, #{readTime} )
+
+    </insert>
+
+    <select id="getReadTimeOfPerson" resultType="java.util.Date">
+        select read_time
+        from chat_message_state
+        where section_id = #{sectionId} and from_id = #{fromId} and to_id = #{toId}
+    </select>
+    <select id="getGroupReadTime" resultType="java.util.Date">
+        select read_time
+        from chat_message_state
+        where section_id = #{sectionId} and to_id = #{userId} and from_id = '0'
+    </select>
+</mapper>

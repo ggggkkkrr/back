@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.SectionReachDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.SectionReach">
+        <!--@Table section_reach-->
+        <result property="sectionId" column="section_id" jdbcType="INTEGER"/>
+        <result property="week" column="week" jdbcType="INTEGER"/>
+        <result property="sectionReachScore" column="section_reach_score" jdbcType="NUMERIC"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select section_id, week, section_reach_score, create_time, modify_time
+        from section_reach
+        where section_id = #{sectionId}
+          and week = #{week}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select section_id, week, section_reach_score, create_time, modify_time
+        from section_reach
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        section_id, week, section_reach_score, create_time, modify_time
+        from section_reach
+        <where>
+            <if test="sectionId != null">
+                and section_id = #{sectionId}
+            </if>
+            <if test="week != null">
+                and week = #{week}
+            </if>
+            <if test="sectionReachScore != null">
+                and section_reach_score = #{sectionReachScore}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="" useGeneratedKeys="true">
+        insert into section_reach(section_id, week, section_reach_score)
+        values (#{sectionId}, #{week}, #{sectionReachScore})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update section_reach
+        <set>
+            <if test="sectionReachScore != null">
+                section_reach_score = #{sectionReachScore},
+            </if>
+        </set>
+        where section_id = #{sectionId}
+        and week = #{week}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from section_reach
+        where section_id = #{sectionId}
+          and week = #{week}
+    </delete>
+
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bylan.dcybackend.dao.AccountDAO">
+    <select id="findAccountByAccountId"
+            parameterType="java.lang.String"
+            resultType="com.bylan.dcybackend.entity.Account">
+        select account_id, password, role, create_time, modify_time
+        from account
+        where account_id = #{accountId}
+    </select>
+
+    <select id="getRoleByAccountId"
+            parameterType="java.lang.String"
+            resultType="java.lang.String">
+        select role
+        from account
+        where account_id = #{accountId}
+    </select>
+</mapper>

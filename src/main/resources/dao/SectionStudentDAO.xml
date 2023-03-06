@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.SectionStudentDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.SectionStudent">
+        <!--@Table section_student-->
+        <result property="sectionId" column="section_id" jdbcType="INTEGER"/>
+        <result property="studentId" column="student_id" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="userVOMap" type="com.bylan.dcybackend.vo.UserVO">
+        <result column="student_id" property="userId"/>
+        <result column="name" property="userName"/>
+    </resultMap>
+
+    <resultMap id="friendMsgStatusVOMap" type="com.bylan.dcybackend.vo.FriendMsgStatusVO">
+        <result column="student_id" property="userId"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select section_id,
+               student_id,
+               create_time,
+               modify_time
+        from section_student
+        where section_id = #{sectionId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select section_id,
+               student_id,
+               create_time,
+               modify_time
+        from section_student
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        section_id, student_id, create_time, modify_time
+        from section_student
+        <where>
+            <if test="sectionId != null">
+                and section_id = #{sectionId}
+            </if>
+            <if test="studentId != null and studentId != ''">
+                and student_id = #{studentId}
+            </if>
+        </where>
+    </select>
+    <select id="getStuUserVoBySectionId" resultMap="userVOMap">
+        select student.name, student.student_id
+        from section_student
+                 join student on section_student.student_id = student.student_id
+        where section_student.section_id = #{sectionId}
+    </select>
+
+    <select id="getStuIdBySectionId" resultMap="friendMsgStatusVOMap">
+        select student_id
+        from section_student
+        where section_id = #{sectionId}
+          and student_id != #{userId}
+    </select>
+    <select id="getStuIdByCourseId" resultType="java.lang.String">
+        select section_student.student_id
+        from section_student join section on section_student.section_id = section.section_id
+        where section.course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="sectionId" useGeneratedKeys="true">
+        insert into section_student(section_id, student_id)
+        values (#{sectionId}, #{studentId})
+    </insert>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from section_student
+        where section_id = #{sectionId}
+          and student_id = #{studentId}
+    </delete>
+
+</mapper>

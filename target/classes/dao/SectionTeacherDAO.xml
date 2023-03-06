@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.SectionTeacherDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.SectionTeacher">
+        <!--@Table section_teacher-->
+        <result property="sectionId" column="section_id" jdbcType="INTEGER"/>
+        <result property="teacherId" column="teacher_id" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="userVOMap" type="com.bylan.dcybackend.vo.UserVO">
+        <result column="teacher_id" property="userId"/>
+        <result column="name" property="userName"/>
+    </resultMap>
+
+    <resultMap id="friendMsgStatusVOMap" type="com.bylan.dcybackend.vo.FriendMsgStatusVO">
+        <result column="teacher_id" property="userId"/>
+    </resultMap>
+
+    <select id="queryDistinctCurriculumByTeacherId" resultType="com.bylan.dcybackend.entity.Curriculum">
+        select curriculum_id,
+               curriculum_code,
+               setup_year,
+               curriculum_name,
+               curriculum_desc,
+               curriculum_status,
+               curriculum_type,
+               major_id,
+               credit,
+               learning_hour,
+               create_time,
+               modify_time
+        from curriculum
+        where curriculum.curriculum_id in (select distinct course.curriculum_id
+                                           from course
+                                           where course.course_id in (select section.course_id
+                                                                      from section
+                                                                      where section.section_id in
+                                                                            (select section_teacher.section_id
+                                                                             from section_teacher
+                                                                             where section_teacher.teacher_id = #{teacherId})))
+    </select>
+
+
+    <select id="queryByTeacherIdAndCurriculumId" resultType="com.bylan.dcybackend.entity.Course">
+        select course_id,
+               curriculum_id,
+               course_code,
+               semester,
+               year,
+               course_desc,
+               course_status,
+               prerequisite,
+               textbook,
+               ref_book,
+               course_website,
+               create_time,
+               modify_time
+        from course
+        where course.curriculum_id = #{curriculumId}
+          and course.course_id in (select section.course_id
+                                   from section
+                                   where section.section_id in (select section_teacher.section_id
+                                                                from section_teacher
+                                                                where section_teacher.teacher_id = #{teacherId}))
+    </select>
+
+    <select id="getOpenedCourseIdByTeacherId" resultType="java.lang.Long">
+        <if test="@com.bylan.dcybackend.domain.GetConstant@getCourseOpen() != null">
+            select course.course_id
+            from course
+            where course.course_status = ${@com.bylan.dcybackend.domain.GetConstant@getCourseOpen()}
+            and course.course_id in (select section.course_id
+            from section
+            where section.section_id in (select section_teacher.section_id
+            from section_teacher
+            where section_teacher.teacher_id = #{teacherId}))
+        </if>
+    </select>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select section_id,
+               teacher_id,
+               create_time,
+               modify_time
+        from section_teacher
+        where section_id = #{sectionId}
+          and teacher_id = #{teacherId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select section_id,
+               teacher_id,
+               create_time,
+               modify_time
+        from section_teacher
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        section_id, teacher_id, create_time, modify_time
+        from section_teacher
+        <where>
+            <if test="sectionId != null">
+                and section_id = #{sectionId}
+            </if>
+            <if test="teacherId != null and teacherId != ''">
+                and teacher_id = #{teacherId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getTeaUserVoBySectionId" resultMap="userVOMap">
+        select teacher.teacher_id, teacher.name
+        from section_teacher
+                 join teacher on section_teacher.teacher_id = teacher.teacher_id
+        where section_teacher.section_id = #{sectionId}
+    </select>
+
+    <select id="getTeaIdBySectionId" resultMap="friendMsgStatusVOMap">
+        select teacher_id
+        from section_teacher
+        where section_id = #{sectionId}
+          and teacher_id != #{userId}
+    </select>
+    <select id="getTeaIdByCourseId" resultType="java.lang.String">
+        select section_teacher.teacher_id
+        from section_teacher join section on section_teacher.section_id = section.section_id
+        where section.course_id = #{courseId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="sectionId" useGeneratedKeys="true">
+        insert into section_teacher(section_id, teacher_id)
+        values (#{sectionId}, #{teacherId})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update section_teacher
+        <set>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime},
+            </if>
+        </set>
+        where section_id = #{sectionId} and teacher_id = #{teacherId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from section_teacher
+        where section_id = #{sectionId}
+          and teacher_id = #{teacherId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.KnowledgeReachDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.KnowledgeReach">
+        <!--@Table knowledge_reach-->
+        <result property="knowledgeId" column="knowledge_id" jdbcType="INTEGER"/>
+        <result property="week" column="week" jdbcType="INTEGER"/>
+        <result property="reachType" column="reach_type" jdbcType="INTEGER"/>
+        <result property="entityId" column="entity_id" jdbcType="VARCHAR"/>
+        <result property="knowledgeReachScore" column="knowledge_reach_score" jdbcType="NUMERIC"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select knowledge_id, week, reach_type, entity_id, knowledge_reach_score, create_time, modify_time
+        from knowledge_reach
+        where knowledge_id = #{knowledgeId}
+          and week = #{week}
+          and reach_type = #{reachType}
+          and entity_id = #{entityId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select knowledge_id, week, reach_type, entity_id, knowledge_reach_score, create_time, modify_time
+        from knowledge_reach
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        knowledge_id, week, reach_type, knowledge_reach_score, create_time, modify_time
+        from knowledge_reach
+        <where>
+            <if test="knowledgeId != null">
+                and knowledge_id = #{knowledgeId}
+            </if>
+            <if test="week != null">
+                and week = #{week}
+            </if>
+            <if test="reachType != null">
+                and reach_type = #{reachType}
+            </if>
+            <if test="entityId != null">
+                and entity_id = #{entityId}
+            </if>
+            <if test="knowledgeReachScore != null">
+                and knowledge_reach_score = #{knowledgeReachScore}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="knowledgeReachId" useGeneratedKeys="true">
+        insert into knowledge_reach(knowledge_id, week, reach_type, entity_id, knowledge_reach_score)
+        values (#{knowledgeId}, #{week}, #{reachType}, #{entityId}, #{knowledgeReachScore})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update knowledge_reach
+        <set>
+            <if test="knowledgeReachScore != null">
+                knowledge_reach_score = #{knowledgeReachScore},
+            </if>
+        </set>
+        where knowledge_id = #{knowledgeId}
+        and week = #{week}
+        and reach_type = #{reachType}
+        and entity_id = #{entityId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from knowledge_reach
+        where knowledge_id = #{knowledgeId}
+          and week = #{week}
+          and reach_type = #{reachType}
+          and entity_id = #{entityId}
+    </delete>
+
+    <delete id="mDeleteByKnowledgeIdAndWeek">
+        delete
+        from knowledge_reach
+        where week = #{week}
+        and knowledge_id in
+        <foreach collection="knowledgeIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bylan.dcybackend.dao.TaskScoreDAO">
+
+     <insert id="mCreateTaskScore" parameterType="java.util.List">
+        replace into task_score (student_id, task_id, task_path)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.studentId},
+            #{item.taskId},
+            #{item.taskPath}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateEvaluation" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update task_score
+            <set>
+                evaluation =#{item.evaluation}
+            </set>
+            where student_id = #{item.studentId} and task_id = #{item.taskId}
+        </foreach>
+    </update>
+    <update id="updateScore"></update>
+
+    <select id="getByStuIdAndTaskId" resultType="com.bylan.dcybackend.entity.TaskScore">
+        select task_path, evaluation, system_analysis
+        from task_score
+        where student_id = #{studentId}
+          and task_id = #{taskId}
+    </select>
+
+
+</mapper>

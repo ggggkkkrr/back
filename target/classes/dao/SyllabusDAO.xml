@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.SyllabusDAO">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Syllabus">
+        <!--@Table syllabus-->
+        <result property="syllabusId" column="syllabus_id" jdbcType="INTEGER"/>
+        <result property="courseId" column="course_id" jdbcType="INTEGER"/>
+        <result property="syllabusPath" column="syllabus_path" jdbcType="VARCHAR"/>
+        <result property="syllabusVersion" column="syllabus_version" jdbcType="VARCHAR"/>
+        <result property="syllabusStatus" column="syllabus_status" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select syllabus_id,
+               course_id,
+               syllabus_path,
+               syllabus_version,
+               syllabus_status,
+               create_time,
+               modify_time
+        from syllabus
+        where syllabus_id = #{syllabusId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select syllabus_id,
+               course_id,
+               syllabus_path,
+               syllabus_version,
+               syllabus_status,
+               create_time,
+               modify_time
+        from syllabus
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        syllabus_id, course_id, syllabus_path, syllabus_version, syllabus_status, create_time, modify_time
+        from syllabus
+        <where>
+            <if test="syllabusId != null">
+                and syllabus_id = #{syllabusId}
+            </if>
+            <if test="courseId != null">
+                and course_id = #{courseId}
+            </if>
+            <if test="syllabusPath != null and syllabusPath != ''">
+                and syllabus_path = #{syllabusPath}
+            </if>
+            <if test="syllabusVersion != null and syllabusVersion != ''">
+                and syllabus_version = #{syllabusVersion}
+            </if>
+            <if test="syllabusStatus != null">
+                and syllabus_status = #{syllabusStatus}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="syllabusId" useGeneratedKeys="true">
+        insert into syllabus(course_id, syllabus_path, syllabus_version, syllabus_status)
+        values (#{courseId}, #{syllabusPath}, #{syllabusVersion}, #{syllabusStatus})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update syllabus
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId},
+            </if>
+            <if test="syllabusPath != null and syllabusPath != ''">
+                syllabus_path = #{syllabusPath},
+            </if>
+            <if test="syllabusVersion != null and syllabusVersion != ''">
+                syllabus_version = #{syllabusVersion},
+            </if>
+            <if test="syllabusStatus != null">
+                syllabus_status = #{syllabusStatus},
+            </if>
+        </set>
+        where syllabus_id = #{syllabusId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete
+        from syllabus
+        where syllabus_id = #{syllabusId}
+    </delete>
+
+</mapper>

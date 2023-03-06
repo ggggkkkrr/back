@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.MajorDao">
+
+    <resultMap id="BaseResultMap" type="com.bylan.dcybackend.entity.Major">
+        <!--@Table major-->
+        <result property="majorId" column="major_id" jdbcType="INTEGER"/>
+        <result property="departmentId" column="department_id" jdbcType="INTEGER"/>
+        <result property="majorCode" column="major_code" jdbcType="VARCHAR"/>
+        <result property="majorName" column="major_name" jdbcType="VARCHAR"/>
+        <result property="majorDesc" column="major_desc" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select
+          major_id, department_id, major_code, major_name, major_desc, create_time, modify_time
+        from dachengyun.major
+        where major_id = #{majorId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="BaseResultMap">
+        select
+          major_id, department_id, major_code, major_name, major_desc, create_time, modify_time
+        from dachengyun.major
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+          major_id, department_id, major_code, major_name, major_desc, create_time, modify_time
+        from dachengyun.major
+        <where>
+            <if test="majorId != null">
+                and major_id = #{majorId}
+            </if>
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="majorCode != null and majorCode != ''">
+                and major_code = #{majorCode}
+            </if>
+            <if test="majorName != null and majorName != ''">
+                and major_name = #{majorName}
+            </if>
+            <if test="majorDesc != null and majorDesc != ''">
+                and major_desc = #{majorDesc}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="modifyTime != null">
+                and modify_time = #{modifyTime}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="majorId" useGeneratedKeys="true">
+        insert into dachengyun.major(department_id, major_code, major_name, major_desc, create_time, modify_time)
+        values (#{departmentId}, #{majorCode}, #{majorName}, #{majorDesc}, #{createTime}, #{modifyTime})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update dachengyun.major
+        <set>
+            <if test="departmentId != null">
+                department_id = #{departmentId},
+            </if>
+            <if test="majorCode != null and majorCode != ''">
+                major_code = #{majorCode},
+            </if>
+            <if test="majorName != null and majorName != ''">
+                major_name = #{majorName},
+            </if>
+            <if test="majorDesc != null and majorDesc != ''">
+                major_desc = #{majorDesc},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime},
+            </if>
+        </set>
+        where major_id = #{majorId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from dachengyun.major where major_id = #{majorId}
+    </delete>
+
+</mapper>

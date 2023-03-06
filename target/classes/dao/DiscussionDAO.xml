@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bylan.dcybackend.dao.DiscussionDAO">
+
+    <resultMap id="discussionVOMap" type="com.bylan.dcybackend.vo.DiscussionVO">
+        <result column="discussion_id" property="discussionId"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="to_user_id" property="toUserId"/>
+        <result column="to_discussion_id" property="toDiscussionId"/>
+        <result column="content" property="content"/>
+        <result column="first_discussion_id" property="firstDiscussionId"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    <insert id="addFirstDiscussion" parameterType="com.bylan.dcybackend.dto.CreateDiscussionDTO">
+        insert into discussion(course_id, user_id, user_name, content,
+                               first_discussion_id, status)
+        values (#{courseId}, #{userId}, #{userName}, #{content},
+                (
+                    SELECT Auto_increment
+                    FROM information_schema.`TABLES`
+                    WHERE Table_Schema = 'dachengyun'
+                      AND table_name = 'discussion'
+                ),
+                #{status}
+                )
+    </insert>
+    <insert id="addReplyDiscussion">
+        insert into discussion(course_id, user_id, user_name, to_user_id, to_discussion_id, content, first_discussion_id, status)
+        values (#{courseId}, #{userId}, #{userName}, #{toUserId}, #{toDiscussionId}, #{content}, #{firstDiscussionId}, #{status})
+    </insert>
+
+    <update id="updateDiscussionStatus">
+        update discussion
+        set status = #{status}
+        where discussion_id in
+        <foreach collection="discussionIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateDiscussionContent">
+        update discussion
+        set content = #{content}
+        where discussion_id = #{discussionId}
+    </update>
+    <select id="getDiscussionByCourseId" resultMap="discussionVOMap">
+        select discussion_id, user_id, user_name, to_user_id, to_discussion_id, content, first_discussion_id, status
+        from discussion
+        where course_id = #{courseId}
+    </select>
+
+</mapper>
